@@ -1,82 +1,98 @@
-# Android locale example
+# AndroidLocaleManager
 
-In this tutorial, I'm going to show you how to set project locale.
+[![](https://jitpack.io/v/MostafaTaghipour/localemanager.svg)](https://jitpack.io/#MostafaTaghipour/localemanager)
 
-![locale](/screenshot.gif)
+## [iOS version is here](https://github.com/MostafaTaghipour/mtpLocaleManager)
 
+AndroidLocaleManger is a locale manager for Android:
 
-- Define LocaleManager class like below
-
-```kotlin
-class LocaleManager private constructor(val context: Context) {
-    var currentLocal: Locale
-        private set
-
-    private val PREFS_LANG_KEY = "prefs_theme_key"
-    private val DEFAULT_LANG = "en"
+- Change locale at runtime
+- Supports multiple language
+- Change locale according to system locale
+- Easy to use
 
 
-    companion object {
-        @SuppressLint("StaticFieldLeak")
-        private var instance : LocaleManager? = null
+![multi-language app](/screenshots/1.gif)
 
-        fun  getInstance(context: Context): LocaleManager {
-            if (instance == null)  // NOT thread safe!
-                instance = LocaleManager(context)
 
-            return instance!!
-        }
+## Requirements
+
+- Api 14+
+
+## Installation
+
+Add JitPack to repositories in your project's root `build.gradle` file:
+
+```Gradle
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
     }
-
-    private  var prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-
-    init {
-        val lng = prefs.getString(PREFS_LANG_KEY, DEFAULT_LANG)
-        currentLocal = Locale(lng)
-    }
-
-
-    fun setLocale(language: String) {
-        val lng = language.toLowerCase()
-        currentLocal= Locale(lng)
-        prefs.edit().putString(PREFS_LANG_KEY, lng).apply()
-    }
-
-    fun wrapContext(): ContextWrapper {
-
-        val language = currentLocal.language
-
-        var ctx = context
-        val config = ctx.resources.configuration
-        if (language != "") {
-            val locale = Locale(language)
-            Locale.setDefault(locale)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                config.setLocale(locale)
-            } else {
-                config.locale = locale
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                config.setLayoutDirection(locale)
-                ctx = ctx.createConfigurationContext(config)
-            } else {
-                ctx.resources.updateConfiguration(config, ctx.resources.displayMetrics)
-            }
-        }
-
-        return ContextWrapper(ctx)
-    }
-
 }
 ```
+
+Add the dependency to your module's `build.gradle` file:
+
+```Gradle
+dependencies {
+    ...
+    implementation 'com.github.MostafaTaghipour:localemanager:1.0.0'
+}
+```
+
+
+## Usage
 
 - Wrap the `Activity` Context:
 
 ```kotlin
-override fun attachBaseContext(newBase: Context?) {
-    super.attachBaseContext(LocaleManager.getInstance(newBase!!).wrapContext())
+override fun attachBaseContext(newBase: Context) {
+    super.attachBaseContext(LocaleManager.getInstance().wrapContext(newBase))
 }
+```
+
+- Any time you need to change the locale of the application using the following code
+
+```kotlin
+LocaleManager.getInstance().setCurrentLocale(this /*context*/, Locale("fa" /* your desired language*/))
 ```
 
 - Thats it, enjoy it
 
+
+### BroadcastReceiver
+There is a BroadcastReceiver that fired when app locale did changed
+```kotlin
+private lateinit var localeReceiver: AppLocaleChangeReceiver
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    //register BroadcastReceiver
+    val filter = IntentFilter()
+    filter.addAction(LocaleManager.APP_LOCALE_CHANGED_BROADCAST_ACTION)
+    this.localeReceiver = AppLocaleChangeReceiver()
+    this.localeReceiver.setListener(this)
+    registerReceiver(this.localeReceiver, filter)
+}
+
+override fun onAppLocaleChanged(newLocale: Locale) {
+    // app locale changed
+}
+
+override fun onDestroy() {
+    super.onDestroy()
+    //unregister BroadcastReceiver
+    unregisterReceiver(this.localeReceiver)
+}
+```
+
+## Author
+
+Mostafa Taghipour, mostafa@taghipour.me
+
+## License
+
+AndroidLocaleManager is available under the MIT license. See the LICENSE file for more info.

@@ -29,7 +29,7 @@ class SettingActivity : BaseActivity(), AdapterView.OnItemSelectedListener, AppL
 
 
         val filter = IntentFilter()
-        filter.addAction(ir.rainyday.localemanager.LocaleManager.APP_LOCALE_CHANGED_BROADCAST_ACTION)
+        filter.addAction(LocaleManager.APP_LOCALE_CHANGED_BROADCAST_ACTION)
         this.localeReceiver = AppLocaleChangeReceiver()
         this.localeReceiver.setListener(this)
         registerReceiver(this.localeReceiver, filter)
