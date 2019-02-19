@@ -12,7 +12,7 @@ AndroidLocaleManger is a locale manager for Android:
 - Easy to use
 
 
-![multi-language app](/screenshots/1.gif)
+![multi-language app](https://raw.githubusercontent.com/MostafaTaghipour/LocaleManager/master/screenshots/1.gif)
 
 
 ## Requirements
